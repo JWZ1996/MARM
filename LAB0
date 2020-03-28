@@ -1,0 +1,85 @@
+// MARM_lab0.cpp : This file contains the 'main' function. Program execution begins and ends there.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <array>
+#include <functional>
+#include <chrono>
+
+constexpr static int arr[] = { 1,6,33,6,2,4,4,1,6,8,44,23,7,84,645,13,4 };
+
+// Safe ARRAY_SIZE macro def
+#define ARRAY_SIZE(A) (sizeof(ArraySizeHelper(A)))
+
+template <typename T, size_t N>
+char(&ArraySizeHelper(T(&a)[N]))[N];
+//===================================
+
+namespace lab0
+{	
+	template<class Iter,typename Predicate>
+	void selectionSort(Iter&& startIt, Iter&& endIt, Predicate lambda) noexcept
+	{
+		size_t currentItemNr { 0 };
+		Iter innerLoopIter   { Iter(startIt) };
+
+		std::for_each(startIt, endIt, [&](auto& item)
+		{
+			auto min_element { std::min_element(innerLoopIter + currentItemNr, endIt,lambda) };
+			std::swap(item, *min_element);
+			currentItemNr++;
+		});
+	}
+	template<class Iter>
+	void selectionSort(Iter&& startIt, Iter&& endIt) noexcept
+	{
+		selectionSort(startIt, endIt, [](auto& first, auto& second) {return first < second; });
+	}
+
+	template<class Container>
+	void printContainer(const Container& container) noexcept
+	{
+		std::cout << "[ ";
+		for (const auto& item : container) 
+		{
+			std::cout << item << ", ";
+		}
+		std::cout << "]\n";
+	};
+
+	class Timer 
+	{
+		 std::chrono::time_point<std::chrono::steady_clock> startTime;
+		 std::chrono::time_point<std::chrono::steady_clock> finishTime;
+
+	public:
+		void start()
+		{
+			startTime = std::chrono::high_resolution_clock::now();
+		}
+		void stop() 
+		{
+			finishTime = std::chrono::high_resolution_clock::now();
+		}
+		template<typename T>
+		auto getTime() 
+		{
+			return std::chrono::duration_cast<T>(finishTime-startTime).count();
+		}
+	};
+}
+
+int main()
+{
+	std::array<int, ARRAY_SIZE(arr)> sortedArray;
+	std::copy(std::begin(arr), std::end(arr), std::begin(sortedArray));
+
+	lab0::Timer t;
+	t.start();
+	lab0::selectionSort(sortedArray.begin(),sortedArray.end());
+	t.stop();
+
+	std::cout << "Elapsed time: " << t.getTime<std::chrono::nanoseconds>() << "ns \n";
+	lab0::printContainer(sortedArray);
+}
