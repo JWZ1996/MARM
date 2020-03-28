@@ -50,8 +50,7 @@ namespace lab0
 
 	class Timer 
 	{
-		 std::chrono::time_point<std::chrono::steady_clock> startTime;
-		 std::chrono::time_point<std::chrono::steady_clock> finishTime;
+		std::chrono::time_point<std::chrono::steady_clock> startTime, finishTime;
 
 	public:
 		void start()
